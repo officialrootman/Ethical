@@ -51,6 +51,11 @@ def home():
             border-radius: 5px;
         }
 
+        .login-container input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
         .login-container button {
             width: 100%;
             padding: 10px;
@@ -69,12 +74,12 @@ def home():
 <body>
     <div class="login-container">
         <h2>Giriş Yap</h2>
-        <form>
+        <form action="/login" method="POST">
             <label for="username">Kullanıcı Adı:</label>
-            <input type="text" id="username" name="username" required>
+            <input type="text" id="username" name="username" autocomplete="off" required>
 
             <label for="password">Şifre:</label>
-            <input type="password" id="password" name="password" required>
+            <input type="password" id="password" name="password" autocomplete="off" required>
 
             <button type="submit">Giriş Yap</button>
         </form>
