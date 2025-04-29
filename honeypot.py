@@ -21,7 +21,7 @@ def tcp_listener():
         client_socket, address = server_socket.accept()
         print(f"Bağlantı algılandı: {address}")
         log_connection(address, "TCP bağlantısı kuruldu")
-        client_socket.send(b"Sunucuya hoş geldiniz!\n")
+        client_socket.send("Sunucuya hoş geldiniz!\n".encode('utf-8'))
         client_socket.close()
 
 # Veri Kaydı için Fonksiyon
