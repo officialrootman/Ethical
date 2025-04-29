@@ -7,7 +7,7 @@ def honeypot():
     port = int(input("Dinlenecek port numarasını girin (ör. 9999): "))
     
     # Log dosyasını otomatik oluştur
-    log_file = "honeypot_log.txt"
+    log_file = "log.txt"
     if not os.path.exists(log_file):
         with open(log_file, "w") as log:
             log.write("Honeypot Logları\n")
