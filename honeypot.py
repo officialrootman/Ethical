@@ -1,43 +1,49 @@
 import socket
-import os
+import logging
+from flask import Flask
+import threading
 
-def honeypot():
-    # Kullanıcıdan IP adresi ve port bilgisi al
-    host = input("Dinlenecek IP adresini girin (ör. 0.0.0.0): ")
-    port = int(input("Dinlenecek port numarasını girin (ör. 9999): "))
+# Flask uygulaması (Sahte HTTP servisi)
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+    return "Bu bir honeypot sistemidir!"
+
+# Dinleyici Fonksiyonu (TCP)
+def tcp_listener():
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind(('0.0.0.0', 8081))  # Farklı bir port seçebilirsiniz
+    server_socket.listen(5)
+    print("TCP Honeypot çalışıyor. Gelen bağlantılar dinleniyor...")
     
-    # Log dosyasını otomatik oluştur
-    log_file = "log.txt"
-    if not os.path.exists(log_file):
-        with open(log_file, "w") as log:
-            log.write("Honeypot Logları\n")
-    print(f"[Honeypot] Log dosyası oluşturuldu: {log_file}")
+    while True:
+        client_socket, address = server_socket.accept()
+        print(f"Bağlantı algılandı: {address}")
+        log_connection(address, "TCP bağlantısı kuruldu")
+        client_socket.send(b"Sunucuya hoş geldiniz!\n")
+        client_socket.close()
 
-    # Socket oluştur ve ayarları uygula
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind((host, port))
-    server.listen(5)
-    print(f"[Honeypot] Dinleniyor: {host}:{port}")
+# Veri Kaydı için Fonksiyon
+def log_connection(address, data):
+    logging.basicConfig(filename='honeypot.log', level=logging.INFO, format='%(asctime)s - %(message)s')
+    logging.info(f"Bağlantı adresi: {address}, Veri: {data}")
 
-    try:
-        while True:
-            # Gelen bağlantıyı kabul et
-            client, address = server.accept()
-            print(f"[Bağlantı] Yeni bağlantı: {address[0]}:{address[1]}")
+# Sahte Dosya Yapısı
+def simulate_file_structure():
+    fake_files = ["passwords.txt", "bank_accounts.xlsx", "server_config.ini"]
+    print("Mevcut dosyalar:")
+    for file in fake_files:
+        print(f"- {file}")
 
-            # Veri al ve log dosyasına kaydet
-            data = client.recv(1024).decode('utf-8')
-            print(f"[Veri] Gelen veri: {data}")
-            with open(log_file, "a") as log:
-                log.write(f"Bağlantı: {address[0]}:{address[1]}, Veri: {data}\n")
-
-            # Yanıt gönder
-            client.send("Bağlantınız loglandı!\n".encode('utf-8'))
-            client.close()
-
-    except KeyboardInterrupt:
-        print("\n[Honeypot] Sonlandırılıyor...")
-        server.close()
-
+# Ana Program
 if __name__ == "__main__":
-    honeypot()
+    # Sahte dosyaları göster
+    simulate_file_structure()
+
+    # Flask sunucusunu bir thread'de çalıştır
+    flask_thread = threading.Thread(target=lambda: app.run(host="0.0.0.0", port=8080, debug=False))
+    flask_thread.start()
+
+    # TCP dinleyiciyi başlat
+    tcp_listener()
